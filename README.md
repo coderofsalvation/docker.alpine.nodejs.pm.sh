@@ -16,13 +16,13 @@ look at [build](build)
 
 This will build and run a docker which has pod & ssh pre-installed.
     
-    $ RUN=1 BUILD=1 LOGIN=1 PROXY_PORT=80 ./build 
+    $ RUN=1 BUILD=1 LOGIN=1 PROXY_PORT=8080 WEBHOOK_PORT=8081 ./build 
 
 to install global npm_modules:
 
     $ NPM_MODULES="typescript coffeescript" BUILD=1 LOGIN=1 ./build
 
-    $ PROXY=1 BUILD=1 RUN=1 LOGIN=1 ./build 
+    $ PROXY_PORT=8080 WEBHOOK_PORT=8081 BUILD=1 RUN=1 LOGIN=1 ./build 
 
 
                          ..........  bb/github   gitrepo       
@@ -41,7 +41,7 @@ to install global npm_modules:
                                  +--+ microservice B +
                                     +----------------+
 
-> NOTE: the lightweight proxy is only installed when `PROXY=1` is passed
+> NOTE: the lightweight proxy is only installed when `PROXY_PORT=1` is passed
 
 # Usage 
 
@@ -53,12 +53,9 @@ A bit of bash tells a thousands words:
       --volume=$(pwd)/install:/install                           \
       --volume=$(pwd)/.ssh:/home/nodejs/.ssh                     \
       --volume=$(pwd)/.ssh.etc:/etc/ssh                          \
-      --env=PROXY=1                                              \
       --env=PROXY_PORT=80                                        \
       --env=WEBHOOK_PORT=80                                      \
-      --env=ROOTPASSWD=test                                      \
-      --env=PASSWD=test                                          \
-      --env=HOSTNAME=nodepod                                     \
+      --env=HOSTNAME=pmnodejs                                    \
       -p 23:22                                                   \
       -p 80:80                                                   \
       -p 8080:8080                                               \
