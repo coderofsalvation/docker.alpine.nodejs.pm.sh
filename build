@@ -1,0 +1,35 @@
+#!/bin/bash
+export PATH=$PATH:$(pwd);
+[[ ! -n $IMAGENAME ]] && IMAGENAME=nodejs-pm.sh
+
+export PROXY_PORT=8080
+export WEBHOOK_PORT=8081
+if [[ -n $BUILD ]]; then 
+  which powscript || {
+    wget "https://raw.githubusercontent.com/coderofsalvation/powscript/master/powscript" 
+    chmod 755 powscript
+  }
+  powscript --compile install/src/install.pow > install/install
+  powscript --compile install/src/boot.pow > install/boot
+  chmod 755 install/*
+  docker build --no-cache -t $IMAGENAME .
+fi
+if [[ -n $RUN ]]; then
+  set -x
+  [[ -n $CLEAN ]] && rm -rf srv/apps/proxy 
+  [[ -n $LOGIN ]] && BG="d" || BG=""
+  docker kill nodejs-pm.sh && docker rm nodejs-pm.sh; 
+  docker run -it$BG                                            \
+    --volume=$(pwd)/srv:/srv                                   \
+    --env=NPM_MODULES="$NPM_MODULES"                           \
+    --env=WEBHOOK_PORT=$WEBHOOK_PORT                           \
+    --env=PROXY_PORT=$PROXY_PORT                               \
+    --env=HOSTNAME=nodejs-pm.sh                                \
+    -p $WEBHOOK_PORT:8081                                      \
+    -p $PROXY_PORT:8080                                        \
+    --name=nodejs-pm.sh                                        \
+    nodejs-pm.sh
+  if [[ -n $LOGIN ]]; then 
+    docker exec -it nodejs-pm.sh /bin/bash
+  fi
+fi

@@ -1,0 +1,31 @@
+#!/usr/bin/env powscript 
+
+chown nodejs:nodejs -R /srv
+ln -s /opt/pm /usr/bin/pm
+
+for mod in $NPM_MODULES
+  su -c "npm install $mod -g" nodejs
+
+su -c 'pm init' nodejs
+su -c 'pm config pmserver 8081' nodejs
+
+add_app(app)
+  if $app =~ "proxy" || $app =~ "pmserver"
+    return 0
+  su -c "pm add $app" nodejs
+
+if -n $PROXY_PORT
+  if ! -d /srv/apps/proxy 
+    echo installing proxy
+    set -x
+    cd /srv/apps
+    git clone https://github.com/donasaur/http-proxy-rules proxy
+    cd proxy
+    npm install
+    mv index.js proxy.js
+    ln -s ../proxytable.js index.js
+    echo -e "export PORT=8080" > env.sh
+    echo -e "export NODE_PATH=.:node_modules" >> env.sh
+
+find /srv/apps -type d -mindepth 1 -maxdepth 1 2>/dev/null | mappipe add_app
+su -c 'pm add /srv/apps/proxy proxy "node index.js"' nodejs

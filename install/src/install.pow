@@ -1,0 +1,16 @@
+# powscript source
+# see: https://github.com/coderofsalvation/powscript
+# run: powscript --compile install.pow > install
+apk update
+
+require 'nodejs.pow'
+require 'git.pow'
+
+install_git nodejs-pm.sh nodejs nodejs
+apk add gawk
+
+ln -fs /srv/apps /home/nodejs/.
+
+echo -e "\nnodejs-pm.sh\n" > /etc/motd
+echo 'alias pm="echo please first run: su nodejs"' >> /root/.bashrc
+ln -s /root/.bashrc /root/.profile
